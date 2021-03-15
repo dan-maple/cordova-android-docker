@@ -1,4 +1,4 @@
-FROM cordova:10.0.0
+FROM danmaple/cordova:10.0.0
 
 # Set build variables.
 ARG JDK_VERSION="8.0.282.hs-adpt"
@@ -11,25 +11,16 @@ ENV JAVA_HOME=/root/.sdkman/candidates/java/current
 ENV ANDROID_SDK_ROOT=/android_sdk
 ENV PATH=${PATH}:${ANDROID_SDK_ROOT}/tools:${ANDROID_SDK_ROOT}/tools/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin
 
-# Install Software Development Kit Manager (SKKMAN) [https://sdkman.io/].
-RUN curl -s "https://get.sdkman.io" | bash
-
-# Install Java Development Kit (JDK)
-RUN source ${HOME}/.sdkman/bin/sdkman-init.sh && \
+# Install Software Development Kit Manager (SKKMAN), Java Development Kit (JDK) and Gradle
+RUN curl -s "https://get.sdkman.io" | bash && \
+    source ${HOME}/.sdkman/bin/sdkman-init.sh && \
     sdk install java ${JDK_VERSION} && \
-    java -version
+    sdk install gradle ${GRADLE_VERSION}
 
-# Install Gradle.
-RUN source ${HOME}/.sdkman/bin/sdkman-init.sh && \
-    sdk install gradle ${GRADLE_VERSION} && \
-    gradle -v
-
-# Install Android command line tools.
+# Install Android SDK command-line, platform and build tools.
 RUN curl https://dl.google.com/android/repository/commandlinetools-linux-6858069_latest.zip -o tools.zip && \
     mkdir -p $ANDROID_SDK_ROOT/cmdline-tools && \
     unzip tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools && \
     rm tools.zip && \
-    mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-
-# Install Android SDK Packages and Tools.
-RUN yes | sdkmanager ${ANDROID_PLATFORM} ${ANDROID_BUILD_TOOLS}
+    mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest && \
+    yes | sdkmanager ${ANDROID_PLATFORM} ${ANDROID_BUILD_TOOLS}
